@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js'
 export default function AccountPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState<User | null>(null)
+  const [username, setUsername] = useState('User')
   const [balance, setBalance] = useState<number>(0)
   const [loading, setLoading] = useState(false)
 
@@ -17,7 +18,6 @@ export default function AccountPage() {
       timeout = setTimeout(() => setLoading(true), 250) // Only show loading if delay exceeds 250ms
 
       const { data, error } = await supabase.auth.getUser()
-
       if (error || !data.user) {
         console.error('User fetch error:', error)
         clearTimeout(timeout)
@@ -26,6 +26,17 @@ export default function AccountPage() {
       }
 
       setUser(data.user)
+
+      // ─── Fetch username from public.users ──────────────────────────────────
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', data.user.id)
+        .single()
+      if (!profileError && profile?.username) {
+        setUsername(profile.username)
+      }
+      // ───────────────────────────────────────────────────────────────────────
 
       const { data: balData, error: balErr } = await supabase
         .rpc('get_balance', { uid: data.user.id })
@@ -38,11 +49,9 @@ export default function AccountPage() {
     }
 
     fetchUserAndBalance()
-
     return () => clearTimeout(timeout)
   }, [])
 
-  const username = user?.user_metadata?.username || 'User'
   const email = user?.email || ''
   const avatarLetter = username.charAt(0).toUpperCase()
 
