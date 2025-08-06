@@ -1,4 +1,3 @@
-// src/pages/DashboardPage.tsx
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -33,8 +32,10 @@ export default function DashboardPage() {
   const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([])
   const [fixedFundLevelMap, setFixedFundLevelMap] = useState<Record<string, number>>({})
 
+  // ✅ Now copies full referral link
   const handleCopy = () => {
-    navigator.clipboard.writeText(referralCode)
+    const fullLink = `https://bydmanagement.name.ng/signup?ref=${referralCode}`
+    navigator.clipboard.writeText(fullLink)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -142,9 +143,11 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Referral Code (raw) */}
+        {/* Referral Code (full link now displayed) */}
         <div className="w-full bg-gray-300 rounded-lg p-3 flex items-center justify-between">
-          <span className="text-xs text-black truncate">https://bydmanagement.name.ng/signup?ref={referralCode || 'N/A'}</span>
+          <span className="text-xs text-black truncate">
+            https://bydmanagement.name.ng/signup?ref={referralCode || 'N/A'}
+          </span>
           <button onClick={handleCopy} className="bg-black text-red-500 px-3 py-1 rounded text-xs">
             {copied ? 'Copied!' : 'Copy'}
           </button>
