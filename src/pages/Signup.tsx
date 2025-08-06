@@ -1,7 +1,5 @@
-// src/pages/Signup.tsx
-
 import { useState, useEffect, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { signUpProfile } from '../lib/auth'
 
 export default function Signup() {
@@ -12,9 +10,17 @@ export default function Signup() {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [toast, setToast] = useState<string>('')
-  const navigate = useNavigate()
 
-  // After showing success toast, redirect to login
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Automatically extract ?ref=... from URL and prefill referral code
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) setReferralCode(ref)
+  }, [searchParams])
+
+  // Redirect to login after showing success toast
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => {
@@ -30,10 +36,7 @@ export default function Signup() {
     setLoading(true)
 
     try {
-      // 1) Create auth user + profile in 'users' table
       await signUpProfile(email, password, referralCode || null, username)
-
-      // 2) Show confirmation message
       setToast('Account created!.')
     } catch (err: any) {
       console.error(err)
@@ -45,7 +48,6 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      {/* Success Toast */}
       {toast && (
         <div className="fixed top-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
           {toast}
@@ -53,7 +55,6 @@ export default function Signup() {
       )}
 
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        {/* Logo */}
         <div className="flex justify-center mb-6">
           <img src="/logo.jpg" alt="BYD Logo" className="h-20 object-contain" />
         </div>
@@ -62,16 +63,13 @@ export default function Signup() {
           Create Your BYD Account
         </h2>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
             {error}
           </div>
         )}
 
-        {/* Signup Form */}
         <form onSubmit={handleSignup} className="space-y-4">
-          {/* Username */}
           <div>
             <label htmlFor="username" className="block text-gray-700 mb-1">
               Username
@@ -87,7 +85,6 @@ export default function Signup() {
             />
           </div>
 
-          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-gray-700 mb-1">
               Email
@@ -103,7 +100,6 @@ export default function Signup() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label htmlFor="password" className="block text-gray-700 mb-1">
               Password
@@ -119,7 +115,6 @@ export default function Signup() {
             />
           </div>
 
-          {/* Referral Code */}
           <div>
             <label htmlFor="referral" className="block text-gray-700 mb-1">
               Referral Code (Optional)
@@ -131,10 +126,10 @@ export default function Signup() {
               placeholder="Enter code"
               value={referralCode}
               onChange={e => setReferralCode(e.target.value)}
+              // readOnly // Uncomment this if you want to prevent editing
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading || !!toast}
@@ -142,30 +137,28 @@ export default function Signup() {
               loading ? 'opacity-50 cursor-not-allowed' : 'hover:from-red-500 hover:to-gray-900'
             }`}
           >
-            {loading
-              ? (
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  />
-                </svg>
-              )
-              : 'Sign Up'
-            }
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            ) : (
+              'Sign Up'
+            )}
           </button>
         </form>
 
-        {/* Link to Login */}
         <div className="flex justify-center items-center mt-4 text-sm">
           <span className="text-gray-600">Already have an account?</span>
           <Link to="/login" className="ml-1 text-red-600 hover:underline">

@@ -144,7 +144,7 @@ export default function DashboardPage() {
 
         {/* Referral Code (raw) */}
         <div className="w-full bg-gray-300 rounded-lg p-3 flex items-center justify-between">
-          <span className="text-xs text-black truncate">{referralCode || 'N/A'}</span>
+          <span className="text-xs text-black truncate">https://bydmanagement.name.ng/signup?ref={referralCode || 'N/A'}</span>
           <button onClick={handleCopy} className="bg-black text-red-500 px-3 py-1 rounded text-xs">
             {copied ? 'Copied!' : 'Copy'}
           </button>
