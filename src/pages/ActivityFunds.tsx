@@ -1,5 +1,4 @@
-// ActivityFunds.tsx — updated for 3-referral-per-claim with 2× payout
-
+// ActivityFunds.tsx — fixed payout display & referral check
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import toast, { Toaster } from 'react-hot-toast'
@@ -79,14 +78,18 @@ export default function ActivityFunds() {
       const { data: { user }, error: sessErr } = await supabase.auth.getUser()
       if (sessErr || !user) throw new Error("Not logged in")
 
-      const { data, error } = await supabase.rpc('claim_activity_fund', {
+      const { error } = await supabase.rpc('claim_activity_fund', {
         p_user_id: user.id,
         p_level: lvl,
       })
 
       if (error) throw error
 
-      toast.success(`Claimed ₦${(data.payout || 0).toLocaleString()}`)
+      // Calculate payout locally
+      const base = LEVELS.find(l => l.level === lvl)?.base || 0
+      const payout = base * MULTIPLIER
+
+      toast.success(`Claimed ₦${payout.toLocaleString()}`)
       await loadData()
 
     } catch (e) {
@@ -149,6 +152,7 @@ export default function ActivityFunds() {
                         ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
                         : 'bg-white text-red-600 hover:bg-red-100'
                       }`}
+
                   >
                     {claimingLevel === level
                       ? 'Processing...'
